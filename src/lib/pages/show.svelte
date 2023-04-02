@@ -1,54 +1,39 @@
 <script>
   import { Navigate } from 'svelte-router-spa'
-  
   export let currentRoute
   export const params = {}
   console.log({ currentRoute, params })
 
   import { onMount, onDestroy } from 'svelte';
+  import { initialSessionData, subscribeSessionData } from '../firebase';
 
-  import {
-    getFirestore,
-    onSnapshot,
-    doc,
-    // setDoc,
-  } from 'firebase/firestore';
+  const sessionData = { ...initialSessionData };
+  let unsubscribeSessionData;
 
-  let sessionData = {
-    players: [],
-    createdAt: null,
-    awards: [],
-  };
-
-  const db = getFirestore();
-  const playerScores = {};
-
-  let docSnapUnsubscribe;
-  onMount(async () => {
-    console.log(`SUBSCRIBE to docSnap ${currentRoute.namedParams.id}`);
-    docSnapUnsubscribe = onSnapshot(doc(db, 'sessions', currentRoute.namedParams.id), (docSnap) => {
-      if (docSnap.exists()) {
-        console.log(`RECEIVED for docSnap ${currentRoute.namedParams.id}`);
-        sessionData.players = [...docSnap.data().players];
-        sessionData.createdAt = docSnap.data().created_at;
-        sessionData.awards = docSnap.data().awards.map(a => ({ ...a }));
-        console.log({ sessionData });
-        sessionData.players.forEach(name => {
-          playerScores[name] = sessionData.awards.filter(award => award.player == name).length; //reduce((accumulator, award) => accumulator + award.value, 0)
-        });
-        console.log({ playerScores });
-      } else {
-        console.log(`Document ${currentRoute.namedParams.id} not found`);
-      }
+  function refreshSessionData(doc) {
+    sessionData.players = [...doc.players];
+    sessionData.createdAt = doc.created_at;
+    sessionData.awards = doc.awards.map((a) => ({ ...a }));
+    console.log({ sessionData });
+    sessionData.players.forEach((name) => {
+      sessionData.playerScores[name] = sessionData.awards.filter(
+        (award) => award.player == name
+      ).length; //reduce((accumulator, award) => accumulator + award.value, 0)
     });
+    console.log({ playerScores: sessionData.playerScores });
+  }
+
+  onMount(async () => {
+    console.log(`SUBSCRIBE to session ${currentRoute.namedParams.id}`);
+    unsubscribeSessionData = subscribeSessionData(currentRoute.namedParams.id, refreshSessionData);
   });
 
   onDestroy(() => {
-    if (docSnapUnsubscribe != null) {
-      console.log(`UNSUBSCRIBE from docSnap ${currentRoute.namedParams.id}`);
-      docSnapUnsubscribe();
-      docSnapUnsubscribe = null;
-    }		
+    if (unsubscribeSessionData != null) {
+      console.log(`UNSUBSCRIBE from session ${currentRoute.namedParams.id}`);
+      unsubscribeSessionData();
+      unsubscribeSessionData = null;
+    }
 	});
 </script>
 
@@ -59,11 +44,16 @@
 
   <h1>Session {currentRoute.namedParams.id}</h1>
 
+
   <ul>
-	{#each sessionData.players as name, i}
-		<li>
-      {name}: {playerScores[name]}
+  {#each sessionData.players as name, i}
+    <li>
+      {name}: {sessionData.playerScores[name]}
     </li>
-	{/each} 
+  {/each} 
   </ul>
+
+  
+
+  
 </div>
