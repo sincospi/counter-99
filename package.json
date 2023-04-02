@@ -1,0 +1,19 @@
+{
+  "name": "vite-svelte-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.0.3",
+    "firebase": "^9.6.11",
+    "firebaseui": "^6.0.1",
+    "svelte": "^3.57.0",
+    "svelte-router-spa": "^6.0.3",
+    "vite": "^4.2.1"
+  }
+}
