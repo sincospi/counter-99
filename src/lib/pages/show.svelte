@@ -56,18 +56,21 @@
   <div class="score-board">
     {#each sessionData.players as name, i}
     <div class="score-board-card">
-        <div class="player-name{lastAwardedPlayer == name ? ' red' : ''}" style="--column-width-multiplier:{columnWidthMultiplier}">
+        <div class="player-name{leadScore == sessionData.playerScores[name] ? ' red' : ''}" style="--column-width-multiplier:{columnWidthMultiplier}">
           {name}
         </div>
-        <div class="player-score{leadScore == sessionData.playerScores[name] ? ' red' : ''}" style="--column-width-multiplier:{columnWidthMultiplier}">
+        <div class="player-score" style="--column-width-multiplier:{columnWidthMultiplier}">
           {sessionData.playerScores[name]}
+          {#if lastAwardedPlayer == name }
+            <span style="color: red">.</span>
+          {/if}
         </div>
     </div>
     {/each}
   </div>
   
   <div class="footer">
-    <Navigate to={'index'}>List</Navigate>
+    <Navigate to={'/'}>List</Navigate>
     <Navigate to={['edit', currentRoute.namedParams.id].join('/')}>Edit</Navigate>
   </div>
 </div>
