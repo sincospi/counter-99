@@ -12,7 +12,7 @@
 
   import { appState } from '../stores.js'
 
-  async function createSession(playerNamesArr) {
+  async function createNewSession(playerNamesArr) {
     const db = getFirestore();
     let docRef;
     const session = {
@@ -36,7 +36,7 @@
     console.log({ playerNames });
     if (playerNames) {
       playerNames = playerNames.split(',').map(x => x.trim()).filter(x => typeof x === 'string' && x.trim().length > 0);
-      const session = await createSession(playerNames);
+      const session = await createNewSession(playerNames);
       if (session) {
         e.target.elements.player_names.value = '';
         appState.updateSession(session);

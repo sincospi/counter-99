@@ -6,6 +6,10 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  query,
+  collection,
+  orderBy,
+  addDoc,
 } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
@@ -46,6 +50,20 @@ export function subscribeSessionData(sessionId, refreshSessionData) {
   return docSnapUnsubscribe;
 }
 
+export function subscribeSessionsList(refreshSessionsList) {
+  const q = query(collection(db, 'sessions'), orderBy('created_at', 'desc'));
+  const listSnapUnsubscribe = onSnapshot(q, (snaps) => {
+    console.log(`RECEIVED snap list`);
+    const list = [];
+    snaps.forEach((doc) => {
+      list.push({ ...doc.data(), id: doc.id });
+      console.log('adding item to list');
+    });
+    refreshSessionsList(list);
+  });
+  return listSnapUnsubscribe;
+}
+
 export async function appendToPlayerScore(sessionId, player, value) {
   console.log(
     `Appending ${value} to player ${player} for session ${sessionId}`
@@ -58,4 +76,24 @@ export async function appendToPlayerScore(sessionId, player, value) {
       value,
     }),
   });
+}
+
+
+export async function createNewSession(playerNamesArr) {
+  const db = getFirestore();
+  let docRef;
+  const newSession = {
+    created_at: new Date(),
+    players: playerNamesArr,
+    awards: [],
+  }
+  console.log({ createPayload: newSession })
+  try {
+    docRef = await addDoc(collection(db, 'sessions'), newSession);
+    console.log('Session document added with ID: ', docRef.id);
+    return docRef.id;
+  } catch (e) {
+    console.error('Error adding session document: ', e);
+    return null;
+  }
 }

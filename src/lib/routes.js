@@ -1,12 +1,12 @@
-import NewPage from './pages/new.svelte';
 import ShowPage from './pages/show.svelte';
 import EditPage from './pages/edit.svelte';
+import IndexPage from './pages/index.svelte';
 import SessionsPage from './pages/index.svelte';
 
 const routes = [
   {
     name: '/',
-    component: NewPage,
+    component: IndexPage,
   },
   {
     name: 'sessions',
