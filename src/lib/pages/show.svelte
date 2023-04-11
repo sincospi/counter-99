@@ -51,8 +51,6 @@
 
 
 <div class="page">
-  <div class="header">{sessionData.createdAt ? sessionData.createdAt.toISOString() : 'Loading...'}</div>
-
   <div class="score-board">
     {#each sessionData.players as name, i}
     <div class="score-board-card">
