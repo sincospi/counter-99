@@ -1,12 +1,16 @@
 <script>
-  import { Navigate } from 'svelte-router-spa'
-  
-  export let currentRoute
-  export const params = {}
-  console.log({ currentRoute, params })
+  import { Navigate } from "svelte-router-spa";
 
-  import { onMount, onDestroy } from 'svelte';
-  import { initialSessionData, subscribeSessionData, appendToPlayerScore } from '../firebase';
+  export let currentRoute;
+  export const params = {};
+  console.log({ currentRoute, params });
+
+  import { onMount, onDestroy } from "svelte";
+  import {
+    initialSessionData,
+    subscribeSessionData,
+    appendToPlayerScore,
+  } from "../firebase";
 
   const sessionData = { ...initialSessionData };
   let unsubscribeSessionData;
@@ -23,10 +27,12 @@
     console.log({ sessionData });
   }
 
-
   onMount(async () => {
     console.log(`SUBSCRIBE to session ${currentRoute.namedParams.id}`);
-    unsubscribeSessionData = subscribeSessionData(currentRoute.namedParams.id, refreshSessionData);
+    unsubscribeSessionData = subscribeSessionData(
+      currentRoute.namedParams.id,
+      refreshSessionData
+    );
   });
 
   onDestroy(() => {
@@ -35,66 +41,92 @@
       unsubscribeSessionData();
       unsubscribeSessionData = null;
     }
-	});
+  });
 
-  async function handleClick(name) {
-    return appendToPlayerScore(currentRoute.namedParams.id, name, 1);
+  function handleClick(name) {
+    appendToPlayerScore(currentRoute.namedParams.id, name, 1);
   }
 
   let columnWidthMultiplier = 0.1;
-  $: columnWidthMultiplier = sessionData.players.length ? (1 / sessionData.players.length) : 0.1;
+  $: columnWidthMultiplier = sessionData.players.length
+    ? 1 / sessionData.players.length
+    : 0.1;
   $: console.log({ columnWidthMultiplier });
 
   let lastAwardedPlayer;
-  $: lastAwardedPlayer = sessionData.awards.length ? sessionData.awards[sessionData.awards.length-1]['player'] : null;
+  $: lastAwardedPlayer = sessionData.awards.length
+    ? sessionData.awards[sessionData.awards.length - 1]["player"]
+    : null;
   $: console.log({ lastAwardedPlayer });
 
   let leadScore;
-  $: leadScore = Object.values(sessionData.playerScores).reduce((accumulator, currentValue) => Math.max(accumulator, currentValue), 0)
+  $: leadScore = Object.values(sessionData.playerScores).reduce(
+    (accumulator, currentValue) => Math.max(accumulator, currentValue),
+    0
+  );
   $: console.log({ leadScore });
 </script>
 
-
-
-
 <div class="page">
-  <div class="header">{sessionData.createdAt ? sessionData.createdAt.toISOString().slice(0,19) : 'Loading...'}</div>
+  <div class="header">
+    {sessionData.createdAt
+      ? sessionData.createdAt.toISOString().slice(0, 19)
+      : "Loading..."}
+  </div>
 
   <div class="score-board">
     {#each sessionData.players as name, i}
-    <div class="score-board-card clickable" on:click={handleClick(name)}>
-        <div class="player-name{leadScore == sessionData.playerScores[name] ? ' red' : ''}" style="--column-width-multiplier:{columnWidthMultiplier}">
-          {name}
-        </div>
-        <div class="player-score" style="--column-width-multiplier:{columnWidthMultiplier}">
-          {sessionData.playerScores[name]}
-          {#if lastAwardedPlayer == name }
-            <span style="color: red">.</span>
-          {/if}
-        </div>
-    </div>
+      <div class="score-board-card">
+        <button on:click={() => handleClick(name)}>
+          <div
+            class="player-name{leadScore == sessionData.playerScores[name]
+              ? ' red'
+              : ''}"
+            style="--column-width-multiplier:{columnWidthMultiplier}"
+          >
+            {name}
+          </div>
+          <div
+            class="player-score"
+            style="--column-width-multiplier:{columnWidthMultiplier}"
+          >
+            {sessionData.playerScores[name]}
+            {#if lastAwardedPlayer == name}
+              <span style="color: red">.</span>
+            {/if}
+          </div>
+        </button>
+      </div>
     {/each}
   </div>
 
   <table class="awards">
     {#each sessionData.awards.slice(-10).reverse() as award, i}
       <tr class="award">
-        <td class="created-at">{isNaN(award.created_at) ? null : award.created_at.toDate().toISOString().slice(0,19)}</td>
-        <td class="player{lastAwardedPlayer == award.player ? ' red' : ''}">{award.player}</td>
+        <td class="created-at"
+          >{isNaN(award.created_at)
+            ? null
+            : award.created_at.toDate().toISOString().slice(0, 19)}</td
+        >
+        <td class="player{lastAwardedPlayer == award.player ? ' red' : ''}"
+          >{award.player}</td
+        >
       </tr>
     {/each}
   </table>
 
   <div class="footer">
-    <Navigate to={'/'}>List</Navigate>
-    <Navigate to={['show', currentRoute.namedParams.id].join('/')}>Show</Navigate>
+    <Navigate to={"/"}>List</Navigate>
+    <Navigate to={["show", currentRoute.namedParams.id].join("/")}
+      >Show</Navigate
+    >
   </div>
 </div>
 
 <style>
-	.player-name {
+  .player-name {
     /* background-color: #ffffff; */
-		/* color: purple; */
+    /* color: purple; */
     border-width: 1px 1px 0;
     border-style: solid;
     /* width: calc(90vw * var(--column-width-multiplier));
@@ -104,7 +136,7 @@
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
-	}
+  }
   .player-score {
     /* background-color: #f060ff; */
     border-width: 0 1px 1px;
@@ -119,7 +151,9 @@
   .red {
     background-color: red;
   }
-  .clickable {
-    cursor: pointer;
+  button {
+    border: none;
+    background-color: transparent;
+    padding: 0;
   }
 </style>
