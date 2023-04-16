@@ -1,5 +1,9 @@
 # counter-99
 
+A web app to keep track of player scores for offline games (board games etc.)
+
+See a demo here: bit.ly/counter-99-netlify
+
 [Edit on StackBlitz ⚡️](https://stackblitz.com/edit/counter-99)
 
 # Firebase
