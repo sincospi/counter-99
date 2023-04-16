@@ -1,31 +1,21 @@
-// Firebase App (the core Firebase SDK) is always required
-import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
   onSnapshot,
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
   query,
   collection,
   orderBy,
   addDoc,
 } from 'firebase/firestore';
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: 'AIzaSyD3LcfuBcOYsn3wyQIMKKkoIYLD5oeK-JI',
-  authDomain: 'counter-99.firebaseapp.com',
-  projectId: 'counter-99',
-  storageBucket: 'counter-99.appspot.com',
-  messagingSenderId: '415144950645',
-  appId: '1:415144950645:web:bb26147a8fe1beee49f13c',
-};
+import { firebaseApp } from "./firebase";
+import { auth } from "./auth";
 
-// Initialize Firebase
-initializeApp(firebaseConfig);
 
-const db = getFirestore();
+const db = getFirestore(firebaseApp);
 
 export const initialSessionData = {
   players: [],
@@ -78,12 +68,34 @@ export async function appendToPlayerScore(sessionId, player, value) {
   });
 }
 
+export async function removeFromPlayerScore(sessionId, player, createdAt) {
+  console.log(
+    `Deleting ${createdAt} from ${player} for session ${sessionId}`
+  );
+  const valueToRemove = { created_at: createdAt, player, value: 1 };
+  const docRef = doc(db, 'sessions', sessionId);
+  return updateDoc(docRef, {
+    awards: arrayRemove(valueToRemove),
+  });
+}
+
+export async function resetAllPlayerScores(sessionId) {
+  console.log(
+    `Reseting all player scores for session ${sessionId}`
+  );
+  const docRef = doc(db, 'sessions', sessionId);
+  return updateDoc(docRef, {
+    awards: [],
+  });
+}
+
 
 export async function createNewSession(playerNamesArr) {
   const db = getFirestore();
   let docRef;
   const newSession = {
     created_at: new Date(),
+    created_by: {uuid: auth.currentUser.uid, name: auth.currentUser.displayName},
     players: playerNamesArr,
     awards: [],
   }

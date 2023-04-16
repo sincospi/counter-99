@@ -6,7 +6,9 @@
   console.log(currentRoute,params)
 
   import { onMount, onDestroy } from 'svelte';
-  import { subscribeSessionsList, createNewSession } from '../firebase';
+  import { subscribeSessionsList, createNewSession } from '../firebase/firestore';
+  import Login from './login.svelte';
+
 
   let sessionsList = [];
 
@@ -49,6 +51,8 @@
 <div>
   <h1>Counter-99</h1>
 
+  <Login />
+
   <h2>New session</h2>
 
   <form on:submit|preventDefault={handleSubmit} class="">
@@ -64,18 +68,20 @@
 
   <table>
     <tr>
-      <th>Created at</th>
-      <th>Player count</th>
-      <th>Award count</th>
+      <th class="left">Created at</th>
+      <th class="left">Created by</th>
+      <th class="left">Players</th>
+      <th class="right">Award count</th>
     </tr>
     {#each sessionsList as session, i}
     <tr>
-      <td>
+      <td class="left">
         <Navigate to={['show', session.id].join('/')}>
           {session.created_at.toDate().toISOString().slice(0,19)}
         </Navigate>
       </td>
-      <td class="right">{session.players.length}</td>
+      <td class="left">{session.created_by.name}</td>
+      <td class="left">{session.players.join(', ')}</td>
       <td class="right">{session.awards.length}</td>
     </tr>
     {/each}
@@ -87,5 +93,8 @@
 <style>
 .right {
   text-align: right;
+}
+.left {
+  text-align: left;
 }
 </style>

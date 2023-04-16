@@ -5,7 +5,7 @@
   console.log({ currentRoute, params })
 
   import { onMount, onDestroy } from 'svelte';
-  import { initialSessionData, subscribeSessionData } from '../firebase';
+  import { initialSessionData, subscribeSessionData } from '../firebase/firestore';
 
   const sessionData = { ...initialSessionData };
   let unsubscribeSessionData;

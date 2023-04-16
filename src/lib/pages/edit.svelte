@@ -10,7 +10,9 @@
     initialSessionData,
     subscribeSessionData,
     appendToPlayerScore,
-  } from "../firebase";
+    removeFromPlayerScore,
+    resetAllPlayerScores,
+  } from "../firebase/firestore";
 
   const sessionData = { ...initialSessionData };
   let unsubscribeSessionData;
@@ -43,8 +45,16 @@
     }
   });
 
-  function handleClick(name) {
+  function addAward(name) {
     appendToPlayerScore(currentRoute.namedParams.id, name, 1);
+  }
+
+  function removeAward(name, createdAt) {
+    removeFromPlayerScore(currentRoute.namedParams.id, name, createdAt);
+  }
+
+  function resetAllScores() {
+    confirm("Are you sure you want to reset all player scores?") && resetAllPlayerScores(currentRoute.namedParams.id);
   }
 
   let columnWidthMultiplier = 0.1;
@@ -77,7 +87,7 @@
   <div class="score-board">
     {#each sessionData.players as name, i}
       <div class="score-board-card">
-        <button on:click={() => handleClick(name)}>
+        <button on:click={() => addAward(name)}>
           <div
             class="player-name{leadScore == sessionData.playerScores[name]
               ? ' red'
@@ -111,9 +121,22 @@
         <td class="player{lastAwardedPlayer == award.player ? ' red' : ''}"
           >{award.player}</td
         >
+        <td class="action">
+          <button on:click={() => removeAward(award.player, award.created_at)}
+            >X</button
+          >
+        </td>
       </tr>
     {/each}
   </table>
+  {#if sessionData.awards.length > 10}
+    <p class="more-awards">Additional scores exists (Only last 10 shown)</p>
+  {/if}
+  {#if sessionData.awards.length > 0}
+    <p class="all-player-score-reset">
+      Reset all player scores: <button on:click={resetAllScores}>Reset</button>
+    </p>
+  {/if}
 
   <div class="footer">
     <Navigate to={"/"}>List</Navigate>
